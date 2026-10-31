@@ -92,7 +92,12 @@ public class MapSeedRerollWindow : Window
         MapPreviewGenerator.Init();
         MapPreviewGenerator.Instance.ClearQueue();
 
+        #if RW_1_6_OR_GREATER
+        _mapSize = MapSizeUtility.DetermineMapSize(world, _tileId, _mapParent);
+        #else
         _mapSize = MapSizeUtility.DetermineMapSize(world, _mapParent);
+        #endif
+
         _orgSeed = SeedRerollData.GetOriginalMapSeed(world, _tileId);
         _actSeed = _data.TryGet(_tileId, out var savedSeed) ? savedSeed : _orgSeed;
 
@@ -186,9 +191,16 @@ public class MapSeedRerollWindow : Window
             var buttonPos = _layout.Abs();
             TooltipHandler.TipRegion(buttonPos, tooltip);
             _layout.PushEnabled(enabled);
+            #if RW_1_7_OR_GREATER
+            var prevColor = GUI.color;
+            if (!enabled) GUI.color = Color.gray;
             var pressed = GUI.Button(buttonPos, icon);
+            GUI.color = prevColor;
+            #else
+            var pressed = GUI.Button(buttonPos, icon);
+            #endif
             _layout.PopEnabled();
-            return pressed;
+            return pressed && enabled;
         }
 
         _layout.BeginRoot(inRect, new LayoutParams { Margin = new(WindowMargin) });
